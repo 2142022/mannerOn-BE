@@ -7,10 +7,7 @@ import com.manneron.manneron.user.dto.UserResDto;
 import com.manneron.manneron.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,8 +22,15 @@ public class UserController {
         return userService.signup(signupReqDto);
     }
 
+    //로그인
     @PostMapping("/login")
     public ResDto<UserResDto> login(@RequestBody LoginReqDto loginReqDto){
         return userService.login(loginReqDto);
     }
+
+    @GetMapping("/{id}")
+    public ResDto<UserResDto> getUser(@PathVariable Long id){
+        return userService.getUser(id);
+    }
+
 }

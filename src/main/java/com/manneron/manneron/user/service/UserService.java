@@ -7,6 +7,7 @@ import com.manneron.manneron.user.dto.UserResDto;
 import com.manneron.manneron.user.entity.User;
 import com.manneron.manneron.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Transactional
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -25,6 +26,7 @@ public class UserService {
     private static final String PASSWORD_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{6,}$";
     private static final String NICKNAME_PATTERN = "^[a-zA-Z가-힣0-9]{1,10}$";
 
+    @Transactional
     public ResDto<UserResDto> signup(SignupReqDto signupReqDto) {
         validateEmail(signupReqDto.getEmail());
         validatePassword(signupReqDto.getPassword());
@@ -41,6 +43,7 @@ public class UserService {
 
     }
 
+    @Transactional
     public ResDto<UserResDto> login(LoginReqDto loginReqDto) {
         validateEmail(loginReqDto.getEmail());
 
@@ -54,6 +57,16 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
         return ResDto.setSuccess(HttpStatus.OK,"로그인 성공");
+    }
+
+    @Transactional(readOnly = true)
+    public ResDto<UserResDto> getUser(Long id){
+        User user = userRepository.findById(id).orElseThrow(
+                ()-> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        UserResDto userResDto = new UserResDto(user.getId(), user.getEmail(), user.getNickname(), user.getJob(), user.getGender(), user.getAgeRange());
+
+        return ResDto.setSuccess(HttpStatus.OK,"회원 조회 성공", userResDto);
     }
 
     //이메일 패턴 검사
