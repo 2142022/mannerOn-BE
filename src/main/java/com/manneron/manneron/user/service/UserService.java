@@ -36,6 +36,9 @@ public class UserService {
         if (findByNicknameByEmail.isPresent()){
             throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
         }
+        if (!signupReqDto.getPassword().equals(signupReqDto.getCheckPassword())){
+           throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
 
         User user = new User(signupReqDto);
         userRepository.save(user);
@@ -95,6 +98,5 @@ public class UserService {
             throw new IllegalArgumentException("사용할 수 없는 닉네임입니다.");
         }
     }
-
 
 }
