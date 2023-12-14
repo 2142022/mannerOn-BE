@@ -35,6 +35,17 @@ public class UserService {
     private static final String NICKNAME_PATTERN = "^[a-zA-Z가-힣0-9]{1,10}$";
 
     @Transactional
+    public ResDto<Boolean> checkEmail(String email){
+        validateEmail(email);
+
+        boolean exists = userRepository.existsByEmail(email);
+        if (exists){
+            throw new GlobalException(DUPLICATED_EMAIL);
+        }
+        return ResDto.setSuccess(HttpStatus.OK,"사용가능한 이메일 입니다.");
+    }
+
+    @Transactional
     public ResDto<UserResDto> signup(SignupReqDto signupReqDto, HttpServletResponse httpServletResponse) {
         validateEmail(signupReqDto.getEmail());
         validatePassword(signupReqDto.getPassword());
