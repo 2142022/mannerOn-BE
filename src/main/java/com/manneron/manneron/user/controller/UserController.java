@@ -17,6 +17,12 @@ public class UserController {
 
     private final UserService userService;
 
+    //이메일 중복 검사
+    @GetMapping("/check-email")
+    public ResDto<Boolean> checkEmail(@RequestParam String email){
+        return userService.checkEmail(email);
+    }
+
     //회원가입
     @PostMapping("/signup")
     public ResDto<UserResDto> signup(@Valid @RequestBody SignupReqDto signupReqDto, HttpServletResponse httpServletResponse){
