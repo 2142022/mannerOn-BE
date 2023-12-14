@@ -1,15 +1,17 @@
 package com.manneron.manneron.chat.dto;
 
+import com.manneron.manneron.chat.entity.Chat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
-public class QuestionReqDto {
-    @Schema(description = "채팅 내용")
-    private String content;
+public class ClovaReqDto {
+    @Schema(description = "메시지")
+    private List<Chat> messages;
 
-    @Schema(description = "카테고리")
-    private String category;
+
 }

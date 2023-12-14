@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity(name = "chatrooms")
 @Getter
 @NoArgsConstructor
@@ -24,6 +27,9 @@ public class Chatroom extends TimeStamped {
 
     @Column(nullable = false)
     private String category;
+
+    @OneToMany(mappedBy = "chatroom", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<Chat> chatList = new ArrayList<>();
 
     public Chatroom(User user, String title, String category) {
         this.user = user;
