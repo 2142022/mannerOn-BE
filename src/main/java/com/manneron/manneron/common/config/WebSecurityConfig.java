@@ -58,6 +58,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers(PERMIT_URL_ARRAY).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/check-email").permitAll()
                 //swagger
                 .requestMatchers("/swagger*/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
