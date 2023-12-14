@@ -1,14 +1,18 @@
 package com.manneron.manneron.user.service;
 
 import com.manneron.manneron.common.dto.ResDto;
+import com.manneron.manneron.common.exception.GlobalException;
+import com.manneron.manneron.common.jwt.JwtUtil;
 import com.manneron.manneron.user.dto.LoginReqDto;
 import com.manneron.manneron.user.dto.SignupReqDto;
 import com.manneron.manneron.user.dto.UserResDto;
 import com.manneron.manneron.user.entity.User;
 import com.manneron.manneron.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,58 +20,80 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.manneron.manneron.common.exception.ExceptionEnum.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
     private static final String PASSWORD_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{6,}$";
     private static final String NICKNAME_PATTERN = "^[a-zA-Z가-힣0-9]{1,10}$";
 
     @Transactional
-    public ResDto<UserResDto> signup(SignupReqDto signupReqDto) {
+    public ResDto<Boolean> checkEmail(String email){
+        validateEmail(email);
+
+        boolean exists = userRepository.existsByEmail(email);
+        if (exists){
+            throw new GlobalException(DUPLICATED_EMAIL);
+        }
+        return ResDto.setSuccess(HttpStatus.OK,"사용가능한 이메일 입니다.");
+    }
+
+    @Transactional
+    public ResDto<UserResDto> signup(SignupReqDto signupReqDto, HttpServletResponse httpServletResponse) {
         validateEmail(signupReqDto.getEmail());
         validatePassword(signupReqDto.getPassword());
         validateNickname(signupReqDto.getNickname());
 
         Optional<User> findByNicknameByEmail = userRepository.findByNickname(signupReqDto.getNickname());
         if (findByNicknameByEmail.isPresent()){
-            throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
+            throw new GlobalException(DUPLICATED_NICK_NAME);
         }
         if (!signupReqDto.getPassword().equals(signupReqDto.getCheckPassword())){
-           throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+           throw new GlobalException(CHECK_PASSWORD);
         }
 
-        User user = new User(signupReqDto);
+        String password = passwordEncoder.encode(signupReqDto.getPassword());
+
+        User user = new User(password,signupReqDto);
         userRepository.save(user);
+
+        jwtUtil.createAndSetToken(httpServletResponse, user.getEmail(), user.getId());
         return ResDto.setSuccess(HttpStatus.OK,"회원가입성공");
 
     }
 
     @Transactional
-    public ResDto<UserResDto> login(LoginReqDto loginReqDto) {
-        validateEmail(loginReqDto.getEmail());
-
+    public ResDto<UserResDto> login(LoginReqDto loginReqDto, HttpServletResponse httpServletResponse) {
         String email = loginReqDto.getEmail();
         String password = loginReqDto.getPassword();
 
-        User user = userRepository.findByEmail(email).orElseThrow(
-                ()-> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        validateEmail(email);
 
-        if (!password.equals(user.getPassword())){
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        User user = userRepository.findByEmail(email).orElseThrow(
+                ()-> new GlobalException(BAD_EMAIL));
+
+        if (!passwordEncoder.matches(password, user.getPassword())){
+            throw new GlobalException(BAD_PASSWORD);
         }
+
+        jwtUtil.createAndSetToken(httpServletResponse, user.getEmail(), user.getId());
         return ResDto.setSuccess(HttpStatus.OK,"로그인 성공");
     }
 
     @Transactional(readOnly = true)
     public ResDto<UserResDto> getUser(Long id){
         User user = userRepository.findById(id).orElseThrow(
-                ()-> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                ()-> new GlobalException(NOT_FOUND_USER));
 
-        UserResDto userResDto = new UserResDto(user.getId(), user.getEmail(), user.getNickname(), user.getJob(), user.getGender(), user.getAgeRange());
+        UserResDto userResDto = new UserResDto(user.getId(), user.getEmail(), user.getNickname(), user.getJob()
+                                                ,user.getGender(), user.getAgeRange());
 
         return ResDto.setSuccess(HttpStatus.OK,"회원 조회 성공", userResDto);
     }
@@ -77,7 +103,7 @@ public class UserService {
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
         Matcher matcher = pattern.matcher(email);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("이메일 주소를 확인 하세요.");
+            throw new GlobalException(EMAIL_REGEX);
         }
     }
 
@@ -86,7 +112,7 @@ public class UserService {
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
         Matcher matcher = pattern.matcher(password);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("비밀번호 조건에 맞지 않습니다.");
+            throw new GlobalException(PASSWORD_REGEX);
         }
     }
 
@@ -95,7 +121,7 @@ public class UserService {
         Pattern pattern = Pattern.compile(NICKNAME_PATTERN);
         Matcher matcher = pattern.matcher(nickname);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("사용할 수 없는 닉네임입니다.");
+            throw new GlobalException(NICKNAME_REGEX);
         }
     }
 
