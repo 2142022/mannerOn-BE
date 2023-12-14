@@ -7,15 +7,24 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.beans.factory.annotation.Value;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import io.swagger.v3.oas.models.servers.Server;
+
+
+import java.util.List;
 
 /**
  * http://localhost:8080/swagger-ui/index.html
  */
 @Configuration
 public class SwaggerConfig {
+
+    @Value("${server.ssl.enabled}")
+    private Boolean sslEnabled;
+
     @Bean
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
@@ -25,7 +34,7 @@ public class SwaggerConfig {
     }
 
     @Bean
-    public OpenAPI carrotCloneAPI() {
+    public OpenAPI mannerOnCloneAPI() {
         Info info = new Info().title("Manner-On")
                 .description("Manner-On")
                 .version("v1.0.0")
@@ -53,10 +62,15 @@ public class SwaggerConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT"));
 
-        return new OpenAPI()
+        OpenAPI openAPI = new OpenAPI()
                 .info(info)
                 .addSecurityItem(securityRequirement)
                 .components(components);
-    }
 
+        if (sslEnabled != null && sslEnabled) {
+            openAPI.servers(List.of(new Server().url("https://manneron.kro.kr/").description("HTTPS Server")));
+        }
+
+        return openAPI;
+    }
 }

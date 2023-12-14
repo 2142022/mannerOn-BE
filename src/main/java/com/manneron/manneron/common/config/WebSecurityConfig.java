@@ -77,6 +77,7 @@ public class WebSecurityConfig {
         // 사전에 약속된 출처를 명시
         config.addAllowedOrigin("http://localhost:3000");
         config.addAllowedOrigin("http://localhost:8080");
+        config.addAllowedOrigin("http://118.67.135.171:8080/");
         config.addAllowedOrigin("https://manneron.kro.kr");
 
         // 특정 헤더를 클라이언트 측에서 사용할 수 있게 지정
