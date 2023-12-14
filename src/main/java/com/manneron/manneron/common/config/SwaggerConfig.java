@@ -67,10 +67,5 @@ public class SwaggerConfig {
                 .addSecurityItem(securityRequirement)
                 .components(components);
 
-        if (sslEnabled != null && sslEnabled) {
-            openAPI.servers(List.of(new Server().url("https://manneron.kro.kr/").description("HTTPS Server")));
-        }
-
-        return openAPI;
     }
 }

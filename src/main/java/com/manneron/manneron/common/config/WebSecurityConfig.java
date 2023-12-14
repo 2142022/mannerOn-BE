@@ -48,7 +48,6 @@ public class WebSecurityConfig {
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
-
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http.cors(withDefaults())
