@@ -23,14 +23,11 @@ public class ChatController {
     private final ChatroomService chatroomService;
     private final ChatService chatService;
 
-    @PostMapping("/start")
-    @Operation(summary = "채팅방 생성 & 첫 답변 요청")
-    public ResDto<AnswerResDto> startChat(@RequestBody QuestionReqDto questionReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        System.out.println("여기는 와??");
-        return ResDto.setSuccess(HttpStatus.OK, "답변 생성 성공", new AnswerResDto(0L, "1"));
+//    @PostMapping("/start")
+//    @Operation(summary = "채팅방 생성 & 첫 답변 요청")
+//    public ResDto<AnswerResDto> startChat(@RequestBody QuestionReqDto questionReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
 //        return chatService.startChat(questionReqDto, userDetails.user());
-    }
-
+//    }
 
     @PostMapping("/{chatroom_id}")
     @Operation(summary = "기존 채팅방에서 답변 요청")
