@@ -23,15 +23,19 @@ public class SignupReqDto {
     @Schema(description = "비밀번호 확인")
     private String checkPassword;
 
+    @NotBlank
     @Schema(description = "닉네임")
     private String nickname;
 
+    @NotBlank
     @Schema(description = "성별")
     private String gender;
 
+    @NotBlank
     @Schema(description = "하는 일")
     private String job;
 
+    @NotBlank
     @Schema(description = "연령대")
     private String ageRange;
 
