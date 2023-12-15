@@ -4,10 +4,12 @@ import com.manneron.manneron.common.util.TimeStamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity(name = "chats")
 @Getter
+@Setter
 @NoArgsConstructor
 public class Chat extends TimeStamped {
     @Id
