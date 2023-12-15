@@ -5,6 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class ChatResDto {
+    @Schema(description = "채팅 고유 번호")
+    private final Long chatId;
     @Schema(description = "채팅 내용")
     private final String chat;
 
@@ -14,7 +16,8 @@ public class ChatResDto {
     @Schema(description = "좋아요 / 싫어요")
     private final int feedback;
 
-    public ChatResDto(String chat, String role, int feedback) {
+    public ChatResDto(Long chatId, String chat, String role, int feedback) {
+        this.chatId = chatId;
         this.chat = chat;
         this.role = role;
         this.feedback = feedback;
