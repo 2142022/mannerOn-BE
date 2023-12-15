@@ -26,7 +26,8 @@ public enum ExceptionEnum {
 
 
     // 404 Not Found
-    NOT_FOUND_CHAT(HttpStatus.NOT_FOUND, "404_1", "채팅 이력이 존재하지 않습니다."),
+    NOT_FOUND_CHAT(HttpStatus.NOT_FOUND, "404_1", "채팅이 존재하지 않습니다."),
+    NOT_FOUND_CHATROOM(HttpStatus.NOT_FOUND, "404_2", "채팅방이 존재하지 않습니다."),
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "404_3", "회원이 존재하지 않습니다."),
 
     // 409 Conflict
