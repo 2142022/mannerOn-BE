@@ -32,7 +32,6 @@ public class UserService {
 
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
     private static final String PASSWORD_PATTERN = "^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,15}$";
-    private static final String NICKNAME_PATTERN = "^[a-zA-Z가-힣0-9]{1,10}$";
 
     @Transactional
     public ResDto<Boolean> checkEmail(String email){
@@ -49,12 +48,7 @@ public class UserService {
     public ResDto<UserResDto> signup(SignupReqDto signupReqDto, HttpServletResponse httpServletResponse) {
         validateEmail(signupReqDto.getEmail());
         validatePassword(signupReqDto.getPassword());
-        validateNickname(signupReqDto.getNickname());
 
-        Optional<User> findByNicknameByEmail = userRepository.findByNickname(signupReqDto.getNickname());
-        if (findByNicknameByEmail.isPresent()){
-            throw new GlobalException(DUPLICATED_NICK_NAME);
-        }
         if (!signupReqDto.getPassword().equals(signupReqDto.getCheckPassword())){
            throw new GlobalException(CHECK_PASSWORD);
         }
@@ -113,15 +107,6 @@ public class UserService {
         Matcher matcher = pattern.matcher(password);
         if (!matcher.matches()) {
             throw new GlobalException(PASSWORD_REGEX);
-        }
-    }
-
-    //닉네임 패턴 검사
-    private void validateNickname(String nickname) {
-        Pattern pattern = Pattern.compile(NICKNAME_PATTERN);
-        Matcher matcher = pattern.matcher(nickname);
-        if (!matcher.matches()) {
-            throw new GlobalException(NICKNAME_REGEX);
         }
     }
 

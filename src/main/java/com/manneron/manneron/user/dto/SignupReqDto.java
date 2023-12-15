@@ -23,29 +23,16 @@ public class SignupReqDto {
     @Schema(description = "비밀번호 확인")
     private String checkPassword;
 
-    @NotBlank(message = "닉네임은 필수 입력 값입니다.")
     @Schema(description = "닉네임")
     private String nickname;
 
-    @NotBlank(message = "성별은 필수 입력 값입니다.")
     @Schema(description = "성별")
     private String gender;
 
-    @NotBlank(message = "직군은 필수 입력 값입니다.")
     @Schema(description = "하는 일")
     private String job;
 
-    @NotBlank(message = "연령대는 필수 입력 값입니다.")
     @Schema(description = "연령대")
     private String ageRange;
 
-//    public SignupReqDto(String email, String password,String checkPassword, String nickname, String gender, String job, String ageRange) {
-//        this.email = email;
-//        this.password = password;
-//        this.checkPassword = checkPassword;
-//        this.nickname = nickname;
-//        this.gender = gender;
-//        this.job = job;
-//        this.ageRange = ageRange;
-//    }
 }

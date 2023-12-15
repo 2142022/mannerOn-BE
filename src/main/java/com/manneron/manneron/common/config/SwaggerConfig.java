@@ -7,9 +7,14 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.beans.factory.annotation.Value;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import io.swagger.v3.oas.models.servers.Server;
+
+
+import java.util.List;
 
 /**
  * http://localhost:8080/swagger-ui/index.html
@@ -54,11 +59,10 @@ public class SwaggerConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT"));
 
-        OpenAPI openAPI = new OpenAPI()
+        return new OpenAPI()
                 .info(info)
                 .addSecurityItem(securityRequirement)
                 .components(components);
-
-        return openAPI;
     }
+
 }
