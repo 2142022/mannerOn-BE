@@ -1,6 +1,5 @@
 package com.manneron.manneron.chat.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manneron.manneron.chat.dto.*;
 import com.manneron.manneron.chat.entity.Chat;
 import com.manneron.manneron.chat.entity.Chatroom;
@@ -12,14 +11,11 @@ import com.manneron.manneron.common.exception.GlobalException;
 import com.manneron.manneron.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
