@@ -31,21 +31,21 @@ public class ChatController {
 //    public ResDto<AnswerResDto> startChat(@RequestBody QuestionReqDto questionReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
     public ResDto<AnswerResDto> startChat(@RequestBody QuestionReqDto questionReqDto) throws IOException {
 //        return chatService.startChat(questionReqDto, userDetails.user());
-        return chatService.startChat(questionReqDto, userRepository.findById(6L).get());
+        return chatService.startChat(questionReqDto, userRepository.findById(21L).get());
     }
 
     @PostMapping("/{chatroomId}")
     @Operation(summary = "기존 채팅방에서 답변 요청")
 //    public ResDto<AnswerResDto> getAnswer(@PathVariable Long chatroomId, @RequestBody QuestionReqDto questionReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
     public ResDto<AnswerResDto> getAnswer(@PathVariable Long chatroomId, @RequestBody QuestionReqDto questionReqDto) throws IOException {
-        return chatService.getAnswer(chatroomId, questionReqDto, userRepository.findById(6L).get());
+        return chatService.getAnswer(chatroomId, questionReqDto, userRepository.findById(21L).get());
     }
 
     @GetMapping("/")
     @Operation(summary = "채팅방 목록 조회")
 //    public ResDto<List<ChatroomResDto>> getChatroomList(@AuthenticationPrincipal UserDetailsImpl userDetails){
     public ResDto<List<ChatroomResDto>> getChatroomList(){
-        return chatroomService.getChatroomList(userRepository.findById(6L).get());
+        return chatroomService.getChatroomList(userRepository.findById(21L).get());
     }
 
     @GetMapping("/{chatroomId}")
