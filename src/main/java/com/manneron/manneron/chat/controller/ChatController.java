@@ -5,6 +5,7 @@ import com.manneron.manneron.chat.service.ChatService;
 import com.manneron.manneron.chat.service.ChatroomService;
 import com.manneron.manneron.common.dto.ResDto;
 import com.manneron.manneron.common.security.UserDetailsImpl;
+import com.manneron.manneron.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,39 +24,48 @@ public class ChatController {
     private final ChatroomService chatroomService;
     private final ChatService chatService;
 
-//    @PostMapping("/start")
-//    @Operation(summary = "채팅방 생성 & 첫 답변 요청")
-//    public ResDto<AnswerResDto> startChat(@RequestBody QuestionReqDto questionReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-//        return chatService.startChat(questionReqDto, userDetails.user());
-//    }
+    private final UserRepository userRepository;
 
-    @PostMapping("/{chatroom_id}")
+    @PostMapping("/start")
+    @Operation(summary = "채팅방 생성 & 첫 답변 요청")
+//    public ResDto<AnswerResDto> startChat(@RequestBody QuestionReqDto questionReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+    public ResDto<AnswerResDto> startChat(@RequestBody QuestionReqDto questionReqDto) throws IOException {
+//        return chatService.startChat(questionReqDto, userDetails.user());
+        return chatService.startChat(questionReqDto, userRepository.findById(6L).get());
+    }
+
+    @PostMapping("/{chatroomId}")
     @Operation(summary = "기존 채팅방에서 답변 요청")
-    public ResDto<AnswerResDto> getAnswer(@PathVariable Long chatroomId, @RequestBody QuestionReqDto questionReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        return chatService.getAnswer(chatroomId, questionReqDto, userDetails.user());
+//    public ResDto<AnswerResDto> getAnswer(@PathVariable Long chatroomId, @RequestBody QuestionReqDto questionReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+    public ResDto<AnswerResDto> getAnswer(@PathVariable Long chatroomId, @RequestBody QuestionReqDto questionReqDto) throws IOException {
+        return chatService.getAnswer(chatroomId, questionReqDto, userRepository.findById(6L).get());
     }
 
     @GetMapping("/")
     @Operation(summary = "채팅방 목록 조회")
-    public ResDto<List<ChatroomResDto>> getChatroomList(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        return chatroomService.getChatroomList(userDetails.user());
+//    public ResDto<List<ChatroomResDto>> getChatroomList(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ResDto<List<ChatroomResDto>> getChatroomList(){
+        return chatroomService.getChatroomList(userRepository.findById(6L).get());
     }
 
-    @GetMapping("/{chatroom_id}")
+    @GetMapping("/{chatroomId}")
     @Operation(summary = "이전 채팅 내용 조회")
-    public ResDto<List<ChatResDto>> getChatList(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long chatroomId){
+//    public ResDto<List<ChatResDto>> getChatList(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long chatroomId){
+    public ResDto<List<ChatResDto>> getChatList(@PathVariable Long chatroomId){
         return chatService.getChatList(chatroomId);
     }
 
-    @PutMapping("/feedback/{chat_id}")
+    @PutMapping("/feedback/{chatId}")
     @Operation(summary = "좋아요 / 싫어요 갱신")
-    public ResDto<Boolean> updateFeedback(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long chatId, @RequestBody FeedbackReqDto feedbackReqDto){
+//    public ResDto<Boolean> updateFeedback(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long chatId, @RequestBody FeedbackReqDto feedbackReqDto){
+    public ResDto<Boolean> updateFeedback(@PathVariable Long chatId, @RequestBody FeedbackReqDto feedbackReqDto){
         return chatService.updateFeedback(chatId, feedbackReqDto.getFeedback());
     }
 
-    @PutMapping("/copy/{chat_id}")
+    @PutMapping("/copy/{chatId}")
     @Operation(summary = "복사 횟수 증가")
-    public ResDto<Boolean> updateCopy(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long chatId){
+//    public ResDto<Boolean> updateCopy(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long chatId){
+    public ResDto<Boolean> updateCopy(@PathVariable Long chatId){
         return chatService.updateCopy(chatId);
     }
 

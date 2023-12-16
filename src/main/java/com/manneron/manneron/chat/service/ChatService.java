@@ -1,6 +1,5 @@
 package com.manneron.manneron.chat.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manneron.manneron.chat.dto.*;
 import com.manneron.manneron.chat.entity.Chat;
 import com.manneron.manneron.chat.entity.Chatroom;
@@ -12,14 +11,11 @@ import com.manneron.manneron.common.exception.GlobalException;
 import com.manneron.manneron.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,51 +30,80 @@ public class ChatService {
     private final ChatroomService chatroomService;
     private final PromptRepository promptRepository;
     private final ChatroomRepository chatroomRepository;
+    private final ClovaService clovaService;
 
-    // TODO: 시스템 지시문
-    private final static String systemMessage = "";
+    // 시스템 지시문
+    private final static String systemMessage = "페르소나: \n" +
+            "-회사 모든사람에게 프로페셔널하고 매너있게 말하는 회사원 매너ON입니다.\n" +
+            "-작성하는 문장에는 존댓말로 작성하며 맞춤법을 틀리지 않고 비속어나 격한 감정을 드러내지 않습니다.\n" +
+            "-만약 사용자가 전달한 문장에 맞춤법이나 띄어쓰기 오류가있다면 수정해줍니다.\n" +
+            "-회사생활이나 업무 관련 주제에 벗어나는 요청이나 질문을 하면 '잘 모르겠습니다'라고 답변합니다.\n";
+//            "\n" +
+//            "-9가지 고민 유형은 아래와 같습니다: \n" +
+//            "1. 정중하게 부탁 거절하기\n" +
+//            "2. 정중하게 업무 요청하기\n" +
+//            "3. 매너있게 상대방과 다른 의견 전달\n" +
+//            "4.경조사 인사\n" +
+//            "5.감사 인사 전달\n" +
+//            "6.명절 인사 전달\n" +
+//            "7.실수 내용은 인정하고 수습, 대처방안 전달하기\n" +
+//            "8.간결, 논리정연하게 수정\n" +
+//            "9. 프로페셔널하게 기한 연장 요청\n" +
+//            "\n" +
+//            "\n" +
+//            "-고민유형 별 필수로 확인해야할 정보.\n" +
+//            "1. 정중하게 부탁 거절하기: 상대방 정보와 사용자와의 관계, 거절하는 부탁과 거절사유, 제시하려는 대처방안 \n" +
+//            "2. 정중하게 업무 요청하기: 상대방의 정보와 사용자와의 관계, 요청하려는 업무와 요청 사유, 기한\n" +
+//            "3. 매너있게 상대방과 다른 의견 전달: 상대방의 정보와 사용자와의 관계, \b상대방의 의견, 사용자의 의견과 논리적인 근거 \n" +
+//            "4.경조사 인사: 상대방의 정보와 사용자와의 관계, 경조사 종류, 전달하고 싶은 메세지  \n" +
+//            "5.감사 인사 전달: 상대방의 정보와 사용자와의 관계, 감사한 일, 전달하고 싶은 메세지  \n" +
+//            "6.명절 인사 전달: 상대방의 정보와 사용자와의 관계, 명절 종류, 전달하고 싶은 메세지  \n" +
+//            "7.실수 내용은 인정하고 수습, 대처방안 전달하기: 상대방의 정보와 사용자와의 관계, 실수한 내용, 수습한 내용, 앞으로의 대처 방안\n" +
+//            "8.간결, 논리정연하게 수정: 육하원칙으로 사용자가 전달하려는 메세지 정보 파악\n" +
+//            "9. 프로페셔널하게 기한 연장 요청: 상대방의 정보와 사용자와의 관계, 요청받은 업무 정보, 기한 연장 요청 사유와 원하는 새로운 기한";
 
     // 채팅방 생성 & 첫 답변 요청
-//    @Transactional
-//    public ResDto<AnswerResDto> startChat(QuestionReqDto questionReqDto, User user) throws IOException {
-//        // 채팅방 생성
-//        Chatroom chatroom = chatroomService.createChatroom(user, questionReqDto);
-//
-//        // 시스템 지시문 저장
-//        saveChat(chatroom, systemMessage, "system");
-//
-//        // 프롬프트 내용 저장
-//        saveChat(chatroom, questionReqDto.getContent(), "user");
-//
-//        // 프롬프트의 치환 메시지 조회
+    public ResDto<AnswerResDto> startChat(QuestionReqDto questionReqDto, User user) throws IOException {
+        // 채팅방 생성
+        Chatroom chatroom = chatroomService.createChatroom(user, questionReqDto);
+
+        // 시스템 지시문 저장
+        saveChat(chatroom, systemMessage, "system");
+
+        // 첫 질문 저장
+        saveChat(chatroom, questionReqDto.getContent(), "user");
+
+//        // 첫 질문이 프롬프트인 경우, 치환 메시지 조회
 //        String substitution = "";
 //        if (promptRepository.existsByOrigin(questionReqDto.getContent())) {
 //            substitution = promptRepository.findByOrigin(questionReqDto.getContent()).get().getSubstitution();
 //        }
-//
-//        List<MessageReqDto> messageReqDtoList = getAllChatList(chatroom.getId());
-//        ClovaReqDto clovaReqDto = new ClovaReqDto(messageReqDtoList, 0.8, 90, 0.5);
-//
-//        // Clova Studion에 답변 요청
-////        String content = clovaService.sendHttpRequest(clovaReqDto);
+
+        // Clova Studio에 보낼 객체 생성
+        List<MessageDto> messageDtoList = getAllChatList(chatroom.getId());
+        ClovaReqDto clovaReqDto = new ClovaReqDto(messageDtoList, 0.5, 80);
+
+        // Clova Studion에 답변 요청
+        System.out.println(clovaReqDto.getMessages().get(0).getContent());
+        ClovaResDto clovaResDto = clovaService.getClovaReply(clovaReqDto);
+//        String content = clovaService.sendHttpRequest(clovaReqDto);
 //        clovaService.sendHttpRequest(clovaReqDto);
-//
-////        AnswerResDto answerResDto = new AnswerResDto(chatroom.getId(), content);
-//        return ResDto.setSuccess(HttpStatus.OK, "답변 요청 성공");
-////        return ResDto.setSuccess(HttpStatus.OK, "답변 요청 성공", answerResDto);
-//    }
+
+        // 답변 저장
+        saveChat(chatroom, clovaResDto.getResult().getMessage().getContent(), "assistant");
+
+        // 답변 반환
+        AnswerResDto answerResDto = new AnswerResDto(chatroom.getId(), clovaResDto.getResult().getMessage().getContent());
+        return ResDto.setSuccess(HttpStatus.OK, "답변 요청 성공", answerResDto);
+    }
 
     // 채팅 저장
-    @Transactional
     public void saveChat(Chatroom chatroom, String content, String role){
         Chat chat = new Chat(chatroom, content, role);
         chatRepository.save(chat);
     }
 
-
-
-    // 채팅방에서 답변 요청
-    @Transactional
+    // 기존 채팅방에서 답변 요청
     public ResDto<AnswerResDto> getAnswer(Long chatroomId, QuestionReqDto questionReqDto, User user) throws IOException {
         // 채팅방 조회
         Chatroom chatroom = chatroomRepository.findById(chatroomId).orElseThrow(
@@ -87,30 +112,35 @@ public class ChatService {
         // 사용자가 질문한 내용 저장
         saveChat(chatroom, questionReqDto.getContent(), "user");
 
-        // 이전 채팅 목록 조회 (시스템 지시문 포함)
-        List<MessageReqDto> messageReqDtoList = getAllChatList(chatroomId);
+        // Clova Studio에 보낼 객체 생성
+        List<MessageDto> messageDtoList = getAllChatList(chatroom.getId());
+        ClovaReqDto clovaReqDto = new ClovaReqDto(messageDtoList, 0.5, 80);
 
-//        // Clova Studion에 답변 요청
-//        String content = clovaService.getClovaReply(chatroom, questionReqDto.getContent());
-//
-//        AnswerResDto answerResDto = new AnswerResDto(chatroom.getId(), content);
-        return ResDto.setSuccess(HttpStatus.OK, "답변 생성 성공");
-//        return ResDto.setSuccess(HttpStatus.OK, "답변 생성 성공", answerResDto);
+        // Clova Studion에 답변 요청
+        ClovaResDto clovaResDto = clovaService.getClovaReply(clovaReqDto);
+//        String content = clovaService.sendHttpRequest(clovaReqDto);
+//        clovaService.sendHttpRequest(clovaReqDto);
+
+        // 답변 저장
+        saveChat(chatroom, clovaResDto.getResult().getMessage().getContent(), "assistant");
+
+        // 답변 반환
+        AnswerResDto answerResDto = new AnswerResDto(chatroom.getId(), clovaResDto.getResult().getMessage().getContent());
+        return ResDto.setSuccess(HttpStatus.OK, "답변 요청 성공", answerResDto);
     }
 
     // 이전 채팅 목록 조회 (시스템 지시문 포함)
-    @Transactional(readOnly = true)
-    public List<MessageReqDto> getAllChatList(Long chatroomId) {
+    public List<MessageDto> getAllChatList(Long chatroomId) {
         List<Chat> chatList = chatRepository.findAllByChatroomId(chatroomId);
-        List<MessageReqDto> messageReqDtoList = new ArrayList<>();
+
+        List<MessageDto> messageDtoList = new ArrayList<>();
         for (Chat chat : chatList){
-            messageReqDtoList.add(new MessageReqDto(chat.getContent(), chat.getRole()));
+            messageDtoList.add(new MessageDto(chat.getContent(), chat.getRole()));
         }
-        return messageReqDtoList;
+        return messageDtoList;
     }
 
     // 이전 채팅 목록 조회 (시스템 지시문 제외)
-    @Transactional
     public ResDto<List<ChatResDto>> getChatList(Long chatroomId) {
         List<Chat> chatList = chatRepository.findAllByChatroomId(chatroomId);
 
@@ -124,7 +154,6 @@ public class ChatService {
     }
 
     // 좋아요 / 싫어요 갱신
-    @Transactional
     public ResDto<Boolean> updateFeedback(Long chatId, int feedback) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(
                 () -> new GlobalException(NOT_FOUND_CHAT)
@@ -135,7 +164,6 @@ public class ChatService {
     }
 
     // 복사 횟수 증가
-    @Transactional
     public ResDto<Boolean> updateCopy(Long chatId) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(
                 () -> new GlobalException(NOT_FOUND_CHAT)

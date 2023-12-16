@@ -17,11 +17,12 @@ public class Chat extends TimeStamped {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "chatroom_id")
-    @MapsId("id")
+    @JoinColumn(name = "chatroom_id", referencedColumnName = "id")
+//    @MapsId("id")
     private Chatroom chatroom;
 
     @Column(nullable = false)
+    @Lob
     private String content;
 
     @Column(nullable = false)

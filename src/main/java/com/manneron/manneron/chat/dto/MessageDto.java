@@ -6,14 +6,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class MessageReqDto {
+public class MessageDto {
     @Schema(description = "내용")
     private String content;
 
     @Schema(description = "역할")
     private String role;
 
-    public MessageReqDto(String content, String role) {
+    public MessageDto(String content, String role) {
         this.content = content;
         this.role = role;
     }
