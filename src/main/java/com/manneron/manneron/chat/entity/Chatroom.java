@@ -24,6 +24,7 @@ public class Chatroom extends TimeStamped {
     private User user;
 
     @Column(nullable = false)
+    @Lob
     private String title;
 
     @Column(nullable = false)
