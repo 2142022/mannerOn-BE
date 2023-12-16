@@ -81,9 +81,14 @@ public class ChatService {
 
         // Clova Studio에 보낼 객체 생성
         List<MessageDto> messageDtoList = getAllChatList(chatroom.getId());
+        log.info("ChatService1");
+        for (MessageDto messageDto : messageDtoList) {
+            System.out.println(messageDto.getContent());
+        }
         ClovaReqDto clovaReqDto = new ClovaReqDto(messageDtoList, 0.5, 80);
 
         // Clova Studion에 답변 요청
+        log.info("ChatService2");
         System.out.println(clovaReqDto.getMessages().get(0).getContent());
         ClovaResDto clovaResDto = clovaService.getClovaReply(clovaReqDto);
 //        String content = clovaService.sendHttpRequest(clovaReqDto);
