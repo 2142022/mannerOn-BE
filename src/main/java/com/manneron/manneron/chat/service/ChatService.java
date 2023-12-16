@@ -28,7 +28,6 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final ChatroomService chatroomService;
-    private final PromptRepository promptRepository;
     private final ChatroomRepository chatroomRepository;
     private final ClovaService clovaService;
     private final Double TEMPERATURE = 0.8;
@@ -80,18 +79,10 @@ public class ChatService {
 
         // Clova Studio에 보낼 객체 생성
         List<MessageDto> messageDtoList = getAllChatList(chatroom.getId());
-        log.info("ChatService1");
-        for (MessageDto messageDto : messageDtoList) {
-            System.out.println(messageDto.getContent());
-        }
         ClovaReqDto clovaReqDto = new ClovaReqDto(messageDtoList, TEMPERATURE, TOPK, REPEAT_PENALTY, MAX_TOKENS);
 
         // Clova Studion에 답변 요청
-        log.info("ChatService2");
-        System.out.println(clovaReqDto.getMessages().get(0).getContent());
         ClovaResDto clovaResDto = clovaService.getClovaReply(clovaReqDto);
-//        String content = clovaService.sendHttpRequest(clovaReqDto);
-//        clovaService.sendHttpRequest(clovaReqDto);
 
         // 답변 저장
         Long chatId = saveChat(chatroom, clovaResDto.getResult().getMessage().getContent(), "assistant");
@@ -124,8 +115,6 @@ public class ChatService {
 
         // Clova Studion에 답변 요청
         ClovaResDto clovaResDto = clovaService.getClovaReply(clovaReqDto);
-//        String content = clovaService.sendHttpRequest(clovaReqDto);
-//        clovaService.sendHttpRequest(clovaReqDto);
 
         // 답변 저장
         Long chatId = saveChat(chatroom, clovaResDto.getResult().getMessage().getContent(), "assistant");
