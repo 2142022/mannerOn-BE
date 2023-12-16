@@ -90,17 +90,17 @@ public class ChatService {
 //        clovaService.sendHttpRequest(clovaReqDto);
 
         // 답변 저장
-        saveChat(chatroom, clovaResDto.getResult().getMessage().getContent(), "assistant");
+        Long chatId = saveChat(chatroom, clovaResDto.getResult().getMessage().getContent(), "assistant");
 
         // 답변 반환
-        AnswerResDto answerResDto = new AnswerResDto(chatroom.getId(), clovaResDto.getResult().getMessage().getContent());
+        AnswerResDto answerResDto = new AnswerResDto(chatroom.getId(), clovaResDto.getResult().getMessage().getContent(), chatId);
         return ResDto.setSuccess(HttpStatus.OK, "답변 요청 성공", answerResDto);
     }
 
     // 채팅 저장
-    public void saveChat(Chatroom chatroom, String content, String role){
+    public Long saveChat(Chatroom chatroom, String content, String role){
         Chat chat = new Chat(chatroom, content, role);
-        chatRepository.save(chat);
+        return chatRepository.save(chat).getId();
     }
 
     // 기존 채팅방에서 답변 요청
@@ -122,10 +122,10 @@ public class ChatService {
 //        clovaService.sendHttpRequest(clovaReqDto);
 
         // 답변 저장
-        saveChat(chatroom, clovaResDto.getResult().getMessage().getContent(), "assistant");
+        Long chatId = saveChat(chatroom, clovaResDto.getResult().getMessage().getContent(), "assistant");
 
         // 답변 반환
-        AnswerResDto answerResDto = new AnswerResDto(chatroom.getId(), clovaResDto.getResult().getMessage().getContent());
+        AnswerResDto answerResDto = new AnswerResDto(chatroom.getId(), clovaResDto.getResult().getMessage().getContent(), chatId);
         return ResDto.setSuccess(HttpStatus.OK, "답변 요청 성공", answerResDto);
     }
 

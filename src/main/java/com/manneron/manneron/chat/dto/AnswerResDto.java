@@ -11,8 +11,12 @@ public class AnswerResDto {
     @Schema(description = "채팅 답변")
     private final String content;
 
-    public AnswerResDto(Long chatroomId, String content) {
+    @Schema(description = "채팅 답변 고유 번호")
+    private final Long chatId;
+
+    public AnswerResDto(Long chatroomId, String content, Long chatId) {
         this.chatroomId = chatroomId;
         this.content = content;
+        this.chatId = chatId;
     }
 }
