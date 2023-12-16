@@ -5,7 +5,6 @@ import com.manneron.manneron.chat.entity.Chat;
 import com.manneron.manneron.chat.entity.Chatroom;
 import com.manneron.manneron.chat.repository.ChatRepository;
 import com.manneron.manneron.chat.repository.ChatroomRepository;
-import com.manneron.manneron.chat.repository.PromptRepository;
 import com.manneron.manneron.common.dto.ResDto;
 import com.manneron.manneron.common.exception.GlobalException;
 import com.manneron.manneron.user.entity.User;
