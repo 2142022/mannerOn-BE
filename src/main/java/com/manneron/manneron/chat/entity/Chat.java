@@ -18,7 +18,6 @@ public class Chat extends TimeStamped {
 
     @ManyToOne
     @JoinColumn(name = "chatroom_id", referencedColumnName = "id")
-//    @MapsId("id")
     private Chatroom chatroom;
 
     @Column(nullable = false)

@@ -16,7 +16,6 @@ public class ClovaController {
 
     @PostMapping("/send-post")
     public void sendRequest(@RequestBody ClovaReqDto clovaReqDto) throws IOException {
-//        clovaService.sendHttpRequest(clovaReqDto);
         clovaService.getClovaReply(clovaReqDto);
     }
 }

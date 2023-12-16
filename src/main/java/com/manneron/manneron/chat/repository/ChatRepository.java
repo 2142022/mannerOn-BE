@@ -11,9 +11,6 @@ import java.util.List;
 
 @Repository
 public interface ChatRepository extends JpaRepository<Chat, Long> {
-
     List<Chat> findAllByChatroomId(Long chatroomId);
 
-    @Query(value = "SELECT c.content, c.role FROM chats c WHERE c.chatroom_id = :chatroomId", nativeQuery = true)
-    List<MessageDto> findMessageDto(@Param("chatroomId") Long chatroomId);
 }
