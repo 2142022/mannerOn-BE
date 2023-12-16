@@ -62,7 +62,7 @@ public class ClovaService {
 
     // Clova Studion에 답변 요청
     public ClovaResDto getClovaReply(ClovaReqDto clovaReqDto) throws IOException {
-
+        log.info("ClovaService1");
         System.out.println(clovaReqDto.getMessages().get(1).getContent());
 
         // Clova Studio에 연결
@@ -83,14 +83,17 @@ public class ClovaService {
             osw.write(data);
             osw.flush();
         }
+        log.info("ClovaService2");
+        System.out.println(data);
 
         // 응답 코드 확인
+        log.info("ClovaService3");
         int responseCode = con.getResponseCode();
         System.out.println("HTTP 응답 코드: " + responseCode);
 
         // 응답 메시지 확인
         if (responseCode == HttpURLConnection.HTTP_OK) { // 성공적인 응답
-            log.info("clovaService1");
+            log.info("clovaService4");
             try (InputStream is = con.getInputStream();
                  InputStreamReader isr = new InputStreamReader(is, "UTF-8");
                  BufferedReader br = new BufferedReader(isr)) {
