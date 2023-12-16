@@ -63,7 +63,7 @@ public class ClovaService {
     // Clova Studion에 답변 요청
     public ClovaResDto getClovaReply(ClovaReqDto clovaReqDto) throws IOException {
 
-        System.out.println(clovaReqDto.getMessages().get(0).getContent());
+        System.out.println(clovaReqDto.getMessages().get(1).getContent());
 
         // Clova Studio에 연결
         String apiURL = clovaURL;
