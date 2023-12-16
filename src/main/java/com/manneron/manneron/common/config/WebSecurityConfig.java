@@ -59,6 +59,8 @@ public class WebSecurityConfig {
                 .requestMatchers(PERMIT_URL_ARRAY).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/{id}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/check-email").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/message/send-post").permitAll()
+                .requestMatchers("/api/**").permitAll()
                 //swagger
                 .requestMatchers("/swagger*/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()

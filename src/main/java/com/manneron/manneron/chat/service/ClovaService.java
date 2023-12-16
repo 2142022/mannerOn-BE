@@ -1,7 +1,9 @@
 package com.manneron.manneron.chat.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manneron.manneron.chat.dto.ClovaReqDto;
-import com.manneron.manneron.chat.repository.ChatRepository;
+import com.manneron.manneron.chat.dto.ClovaResDto;
+import com.manneron.manneron.chat.dto.ResultDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 
 @Slf4j
@@ -25,85 +32,88 @@ public class ClovaService {
     @Value("${clova.content.type}")
     private String contentType;
 
-    private final ChatRepository chatRepository;
-    private final ChatService chatService;
-
-    public void sendHttpRequest(ClovaReqDto clovaReqDto){
+    public void sendHttpRequest(ClovaReqDto clovaReqDto) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-NCP-CLOVASTUDIO-API-KEY", apiKey);
         headers.set("X-NCP-APIGW-API-KEY", apiGWKey);
-        headers.set("Content-Type", "application/json");
+        headers.set("Content-Type", contentType);
 
         HttpEntity<ClovaReqDto> requestEntity = new HttpEntity<>(clovaReqDto, headers);
 
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
+        ResponseEntity<ClovaResDto> responseEntity = restTemplate.exchange(
                 clovaURL,
                 HttpMethod.POST,
                 requestEntity,
-                String.class
+                ClovaResDto.class
         );
 
         HttpStatus statusCode = (HttpStatus) responseEntity.getStatusCode();
         if(statusCode == HttpStatus.OK){
-            String responseBody = responseEntity.getBody();
+            ClovaResDto responseBody = responseEntity.getBody();
+            System.out.println(responseBody.getResult().getMessage().getContent());
         }else{
             log.error("HTTP 요청이 실패했습니다. 상태 코드: {}", statusCode);
             throw new RuntimeException("HTTP 요청이 실패했습니다.");
         }
-
     }
 
     // Clova Studion에 답변 요청
-//    @Transactional
-//    public String getClovaReply(Chatroom chatroom, String question) throws IOException {
-//
-//        // Clova Studio에 연결
-//        String apiURL = clovaURL;
-//        URL url = new URL(apiURL);
-//        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-//        con.setRequestMethod("POST");
-//        con.setRequestProperty("X-NCP-CLOVASTUDIO-API-KEY", apiKey);
-//        con.setRequestProperty("X-NCP-APIGW-API-KEY", apiGWKey);
-//        con.setRequestProperty("Content-Type", contentType);
-//
-//        // 데이터 전송
-//        con.setDoOutput(true);
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String jsonReq = objectMapper.writeValueAsString(clovaReqDto);
-//        try (OutputStream os = con.getOutputStream();
-//             OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8")) {
-//            osw.write(jsonReq);
-//            osw.flush();
-//        }
-//
-//        // 응답 코드 확인
-//        int responseCode = con.getResponseCode();
-//        System.out.println("HTTP 응답 코드: " + responseCode);
-//
-//        // 응답 메시지 확인
-//        if (responseCode == HttpURLConnection.HTTP_OK) {
-//            try (BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-//                String line;
-//                StringBuilder response = new StringBuilder();
-//                while ((line = reader.readLine()) != null) {
-//                    response.append(line);
-//                }
-//                System.out.println("응답 바디: " + response.toString());
-//            }
-//        } else {
-//            System.out.println("에러 응답: " + responseCode);
-//        }
-//
-//        con.disconnect();
-//
-//        // 답변 저장
-//        String answer = "";
-//        chatService.saveChat(chatroom, answer, "assistant");
-//
-//        return answer;
-//    }
+    public ClovaResDto getClovaReply(ClovaReqDto clovaReqDto) throws IOException {
+
+        System.out.println(clovaReqDto.getMessages().get(0).getContent());
+
+        // Clova Studio에 연결
+        String apiURL = clovaURL;
+        URL url = new URL(apiURL);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("X-NCP-CLOVASTUDIO-API-KEY", apiKey);
+        con.setRequestProperty("X-NCP-APIGW-API-KEY", apiGWKey);
+        con.setRequestProperty("Content-Type", contentType);
+
+        // 데이터 전송
+        con.setDoOutput(true);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String data = objectMapper.writeValueAsString(clovaReqDto);
+        try (OutputStream os = con.getOutputStream();
+             OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8")) {
+            osw.write(data);
+            osw.flush();
+        }
+
+        // 응답 코드 확인
+        int responseCode = con.getResponseCode();
+        System.out.println("HTTP 응답 코드: " + responseCode);
+
+        // 응답 메시지 확인
+        if (responseCode == HttpURLConnection.HTTP_OK) { // 성공적인 응답
+            log.info("clovaService1");
+            try (InputStream is = con.getInputStream();
+                 InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+                 BufferedReader br = new BufferedReader(isr)) {
+
+                StringBuilder responseStringBuilder = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    responseStringBuilder.append(line);
+                }
+
+                String responseBody = responseStringBuilder.toString();
+                ClovaResDto clovaResDto = objectMapper.readValue(responseBody, ClovaResDto.class);
+                log.info("clovaService2");
+                System.out.println(clovaResDto.getResult().getMessage().getContent());
+                return clovaResDto;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // 실패한 응답 처리 (에러 코드를 출력하거나 예외를 던지는 등)
+        }
+
+        return null;
+    }
 }

@@ -3,6 +3,7 @@ package com.manneron.manneron.chat.entity;
 import com.manneron.manneron.common.util.TimeStamped;
 import com.manneron.manneron.user.entity.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,8 +19,8 @@ public class Chatroom extends TimeStamped {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    @MapsId("id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+//    @MapsId("id")
     private User user;
 
     @Column(nullable = false)
